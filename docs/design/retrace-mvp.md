@@ -75,6 +75,8 @@ Relative time uses `moment(...).fromNow()` from `obsidian`, so it follows the Ob
 - **No "only edited" toggle.** IDEA's checkbox distinguishes modified from merely opened buffers; Obsidian autosaves, so the distinction has no meaning. The typed filter replaces it.
 - **No IDEA left rail.** The tool-window list in IDEA's recent-files popup has no Obsidian counterpart.
 - **Markdown only.** Non-markdown files are not recorded.
+- **No `Ctrl+E` restore toggle.** Rebinding lives in Obsidian's own hotkey settings; a plugin switch would duplicate that mechanism.
+- **Location preview is raw text.** Rendering markdown per line would break the line-number gutter and the fixed row height IDEA's popup has.
 
 ## Out of scope for the first release
 
@@ -83,7 +85,3 @@ Relative time uses `moment(...).fromNow()` from `obsidian`, so it follows the Ob
 - Symbols other than headings (tags, links, blocks).
 - Reordering or pinning entries.
 
-## Open questions
-
-- Whether a settings toggle should restore Obsidian's native `Ctrl+E` on demand.
-- Whether the recent-locations preview should render markdown or raw text.

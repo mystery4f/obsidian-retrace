@@ -101,7 +101,7 @@ export default class RetracePlugin extends Plugin {
 			new Notice("Retrace: no recent files yet.");
 			return;
 		}
-		new JumpPanel(this.app, { placeholder: "Filter recent files…", items }).open();
+		new JumpPanel(this.app, { title: "Recent files", placeholder: "Filter recent files…", items }).open();
 	}
 
 	private async openRecentLocations(): Promise<void> {
@@ -110,7 +110,7 @@ export default class RetracePlugin extends Plugin {
 			new Notice("Retrace: no recent locations yet.");
 			return;
 		}
-		new JumpPanel(this.app, { placeholder: "Filter recent locations…", items }).open();
+		new JumpPanel(this.app, { title: "Recent locations", placeholder: "Filter recent locations…", items }).open();
 	}
 
 	private openOutline(): void {
@@ -119,7 +119,7 @@ export default class RetracePlugin extends Plugin {
 			new Notice("Retrace: the active file has no headings.");
 			return;
 		}
-		new JumpPanel(this.app, { placeholder: "Filter headings…", items }).open();
+		new JumpPanel(this.app, { title: "Outline", placeholder: "Filter headings…", items }).open();
 	}
 
 	private scheduleSave(): void {

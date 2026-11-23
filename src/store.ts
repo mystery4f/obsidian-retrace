@@ -32,7 +32,7 @@ export interface RetraceData {
 export const DEFAULT_SETTINGS: RetraceSettings = {
 	maxRecentFiles: 50,
 	maxRecentLocations: 100,
-	previewLines: 2,
+	previewLines: 1,
 };
 
 export function defaultData(): RetraceData {

@@ -1,12 +1,15 @@
-import { App, Modal } from "obsidian";
+import { App, Modal, setIcon } from "obsidian";
 
 export interface PreviewLine {
+	/** 1-based line number as shown in the gutter. */
+	lineNo: number;
 	text: string;
 	isTarget: boolean;
 }
 
 export interface JumpItem {
 	id: string;
+	icon?: string;
 	title: string;
 	subtitle?: string;
 	meta?: string;
@@ -19,15 +22,21 @@ export interface JumpItem {
 }
 
 export interface JumpPanelOptions {
+	title: string;
 	placeholder: string;
 	items: JumpItem[];
 }
 
+const BASE_PADDING_LEFT = 10;
+const INDENT_STEP = 14;
+
 /**
- * One modal for all three commands: a filter box, a list, and the keyboard
- * contract of IDEA's popups.
+ * One modal for all three commands: a title, a filter box, a list, and the
+ * keyboard contract of IDEA's popups.
  */
 export class JumpPanel extends Modal {
+	private readonly panelTitle: string;
+	private readonly placeholder: string;
 	private readonly items: JumpItem[];
 	private filtered: JumpItem[];
 	private selected = 0;
@@ -37,15 +46,15 @@ export class JumpPanel extends Modal {
 
 	constructor(app: App, options: JumpPanelOptions) {
 		super(app);
+		this.panelTitle = options.title;
+		this.placeholder = options.placeholder;
 		this.items = options.items;
 		this.filtered = options.items;
-		this.placeholder = options.placeholder;
 	}
-
-	private readonly placeholder: string;
 
 	onOpen(): void {
 		this.modalEl.addClass("retrace-modal");
+		this.titleEl.setText(`${this.panelTitle} (${this.items.length})`);
 		const { contentEl } = this;
 
 		this.inputEl = contentEl.createEl("input", {
@@ -125,7 +134,10 @@ export class JumpPanel extends Modal {
 				cls: index === this.selected ? "retrace-item is-selected" : "retrace-item",
 			});
 			if (item.indent) {
-				row.style.paddingLeft = `${8 + item.indent * 16}px`;
+				row.style.paddingLeft = `${BASE_PADDING_LEFT + item.indent * INDENT_STEP}px`;
+			}
+			if (item.icon) {
+				setIcon(row.createSpan({ cls: "retrace-item-icon" }), item.icon);
 			}
 			row.createSpan({ cls: "retrace-item-title", text: item.title });
 			if (item.subtitle) {
@@ -139,17 +151,20 @@ export class JumpPanel extends Modal {
 				this.choose(false);
 			});
 			if (item.preview && item.preview.length > 0) {
-				const previewEl = this.listEl.createDiv({ cls: "retrace-preview" });
-				for (const line of item.preview) {
-					previewEl.createDiv({
-						cls: line.isTarget
-							? "retrace-preview-line is-target"
-							: "retrace-preview-line",
-						text: line.text,
-					});
-				}
+				this.renderPreview(item.preview);
 			}
 		});
+	}
+
+	private renderPreview(preview: PreviewLine[]): void {
+		const previewEl = this.listEl.createDiv({ cls: "retrace-preview" });
+		for (const line of preview) {
+			const lineEl = previewEl.createDiv({
+				cls: line.isTarget ? "retrace-preview-line is-target" : "retrace-preview-line",
+			});
+			lineEl.createSpan({ cls: "retrace-preview-no", text: String(line.lineNo) });
+			lineEl.createSpan({ cls: "retrace-preview-text", text: line.text });
+		}
 	}
 
 	private scrollSelectionIntoView(): void {

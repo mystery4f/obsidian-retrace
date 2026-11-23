@@ -11,6 +11,7 @@ export function buildFileItems(app: App, data: RetraceData): JumpItem[] {
 		}
 		items.push({
 			id: entry.path,
+			icon: "file-text",
 			title: file.basename,
 			subtitle: file.parent?.path ?? "/",
 			meta: moment(entry.openedAt).fromNow(),
@@ -35,6 +36,7 @@ export async function buildLocationItems(
 		}
 		items.push({
 			id: `${entry.path}:${entry.line}`,
+			icon: "file-text",
 			title: file.basename,
 			subtitle: entry.headingPath,
 			meta: moment(entry.visitedAt).fromNow(),
@@ -56,6 +58,7 @@ export function buildOutlineItems(app: App): JumpItem[] {
 	const headings = app.metadataCache.getFileCache(file)?.headings ?? [];
 	return headings.map((heading) => ({
 		id: `heading:${heading.position.start.line}`,
+		icon: "hash",
 		title: heading.heading,
 		indent: Math.max(0, heading.level - 1),
 		meta: String(heading.position.start.line + 1),
@@ -96,7 +99,7 @@ async function readPreview(
 	const end = Math.min(lines.length - 1, line + radius);
 	const preview: PreviewLine[] = [];
 	for (let index = start; index <= end; index++) {
-		preview.push({ text: lines[index] ?? "", isTarget: index === line });
+		preview.push({ lineNo: index + 1, text: lines[index] ?? "", isTarget: index === line });
 	}
 	return preview;
 }

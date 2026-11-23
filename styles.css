@@ -1,68 +1,137 @@
+/* Retrace panels: IDEA popup geometry. Selection is IDEA blue (#3574f0) with a
+   full-bleed row so the current line is unmistakable while typing a filter. */
+
 .retrace-modal {
-	width: min(720px, 90vw);
+	width: min(760px, 92vw);
+}
+
+.retrace-modal .modal-title {
+	margin-bottom: 8px;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	font-weight: 500;
 }
 
 .retrace-modal .retrace-input {
 	width: 100%;
-	margin-bottom: 8px;
+	margin-bottom: 4px;
 }
 
 .retrace-list {
-	max-height: 60vh;
+	max-height: 62vh;
 	overflow-y: auto;
+	margin: 0 -8px;
+	padding: 0 8px;
+}
+
+.retrace-empty {
+	padding: 8px 2px;
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
 }
 
 .retrace-item {
 	display: flex;
-	align-items: baseline;
-	gap: 8px;
-	padding: 4px 8px;
-	border-radius: 4px;
+	align-items: center;
+	gap: 6px;
+	min-height: 24px;
+	padding: 3px 10px;
+	border-radius: 3px;
 	cursor: pointer;
 }
 
 .retrace-item.is-selected {
-	background: var(--background-modifier-hover);
+	background: #3574f0;
+	color: #ffffff;
+}
+
+.retrace-item.is-selected .retrace-item-icon,
+.retrace-item.is-selected .retrace-item-subtitle,
+.retrace-item.is-selected .retrace-item-meta {
+	color: rgba(255, 255, 255, 0.8);
+}
+
+.retrace-item-icon {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	color: var(--text-faint);
+}
+
+.retrace-item-icon .svg-icon {
+	width: 14px;
+	height: 14px;
 }
 
 .retrace-item-title {
-	flex: 1 1 auto;
+	flex: 0 0 auto;
+	max-width: 55%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.retrace-item-subtitle {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
 }
 
 .retrace-item-meta {
 	flex: 0 0 auto;
+	margin-left: auto;
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
-}
-
-.retrace-item-subtitle {
-	color: var(--text-muted);
-	font-size: var(--font-ui-smaller);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
 }
 
 .retrace-preview {
-	margin: 2px 0 6px 8px;
-	padding: 4px 8px;
-	border-left: 2px solid var(--background-modifier-border);
+	margin: 0 0 4px;
+	padding: 2px 10px 2px 30px;
+	overflow: hidden;
 	color: var(--text-muted);
 	font-family: var(--font-monospace);
 	font-size: var(--font-ui-smaller);
+	line-height: 1.45;
+}
+
+.retrace-preview-line {
+	display: flex;
+	gap: 10px;
 	white-space: pre;
+}
+
+.retrace-preview-no {
+	flex: 0 0 auto;
+	width: 4ch;
+	text-align: right;
+	color: var(--text-faint);
+	user-select: none;
+	font-variant-numeric: tabular-nums;
+}
+
+.retrace-preview-text {
+	flex: 1 1 auto;
 	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .retrace-preview-line.is-target {
 	color: var(--text-normal);
-	background: var(--background-modifier-hover);
 }
 
-.retrace-indent {
-	display: inline-block;
-	width: 1.2em;
+.retrace-preview-line.is-target .retrace-preview-text {
+	font-weight: 600;
+}
+
+.retrace-footer {
+	margin-top: 6px;
+	text-align: right;
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	font-variant-numeric: tabular-nums;
 }

@@ -3,6 +3,9 @@
 
 .retrace-modal {
 	width: min(760px, 92vw);
+	/* Follow the active theme so the bar never fights a warm or tinted palette. */
+	--retrace-selection: var(--interactive-accent, #3574f0);
+	--retrace-selection-text: var(--text-on-accent, #ffffff);
 }
 
 .retrace-modal .modal-title {
@@ -41,14 +44,15 @@
 }
 
 .retrace-item.is-selected {
-	background: #3574f0;
-	color: #ffffff;
+	background: var(--retrace-selection);
+	color: var(--retrace-selection-text);
 }
 
 .retrace-item.is-selected .retrace-item-icon,
 .retrace-item.is-selected .retrace-item-subtitle,
 .retrace-item.is-selected .retrace-item-meta {
-	color: rgba(255, 255, 255, 0.8);
+	color: var(--retrace-selection-text);
+	opacity: 0.8;
 }
 
 .retrace-item-icon {

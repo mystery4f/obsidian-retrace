@@ -56,17 +56,40 @@ export function buildOutlineItems(app: App): JumpItem[] {
 		return [];
 	}
 	const headings = app.metadataCache.getFileCache(file)?.headings ?? [];
-	return headings.map((heading) => ({
-		id: `heading:${heading.position.start.line}`,
-		icon: "hash",
-		title: heading.heading,
-		indent: Math.max(0, heading.level - 1),
-		meta: String(heading.position.start.line + 1),
-		searchText: heading.heading,
-		onChoose: (newLeaf) => {
-			void openFileAt(app, file, heading.position.start.line, newLeaf);
-		},
-	}));
+	const chain: string[] = [];
+	return headings.map((heading) => {
+		chain.length = heading.level - 1;
+		chain[heading.level - 1] = heading.heading;
+		const parents = chain
+			.slice(0, Math.max(0, heading.level - 1))
+			.filter((entry) => Boolean(entry));
+		const line = heading.position.start.line;
+		return {
+			id: `heading:${line}`,
+			icon: "hash",
+			title: heading.heading,
+			subtitle: parents.length > 0 ? parents.join(" › ") : undefined,
+			indent: Math.max(0, heading.level - 1),
+			meta: String(line + 1),
+			searchText: [...parents, heading.heading].join(" "),
+			onChoose: (newLeaf: boolean) => {
+				void openFileAt(app, file, line, newLeaf);
+			},
+		};
+	});
+}
+
+/** Line of the last heading at or above `line`, for preselecting the outline. */
+export function headingLineAt(app: App, file: TFile, line: number): number | null {
+	const headings = app.metadataCache.getFileCache(file)?.headings ?? [];
+	let found: number | null = null;
+	for (const heading of headings) {
+		if (heading.position.start.line > line) {
+			break;
+		}
+		found = heading.position.start.line;
+	}
+	return found;
 }
 
 async function openFileAt(

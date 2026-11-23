@@ -1,5 +1,10 @@
 import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
-import { buildFileItems, buildLocationItems, buildOutlineItems } from "./src/items";
+import {
+	buildFileItems,
+	buildLocationItems,
+	buildOutlineItems,
+	headingLineAt,
+} from "./src/items";
 import { JumpPanel } from "./src/panel";
 import { RetraceSettingTab } from "./src/settings";
 import { MruStore, RetraceData, defaultData } from "./src/store";
@@ -119,7 +124,17 @@ export default class RetracePlugin extends Plugin {
 			new Notice("Retrace: the active file has no headings.");
 			return;
 		}
-		new JumpPanel(this.app, { title: "Outline", placeholder: "Filter headings…", items }).open();
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		const cursorLine = view ? view.editor.getCursor().line : null;
+		const headingLine =
+			view?.file && cursorLine !== null ? headingLineAt(this.app, view.file, cursorLine) : null;
+		const initialSelectionId = headingLine === null ? undefined : `heading:${headingLine}`;
+		new JumpPanel(this.app, {
+			title: "Outline",
+			placeholder: "Filter headings…",
+			items,
+			initialSelectionId,
+		}).open();
 	}
 
 	private scheduleSave(): void {

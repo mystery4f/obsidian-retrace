@@ -25,6 +25,8 @@ export interface JumpPanelOptions {
 	title: string;
 	placeholder: string;
 	items: JumpItem[];
+	/** Item to preselect once the panel opens, e.g. the heading under the cursor. */
+	initialSelectionId?: string;
 }
 
 const BASE_PADDING_LEFT = 10;
@@ -43,6 +45,7 @@ export class JumpPanel extends Modal {
 	private listEl: HTMLElement;
 	private inputEl: HTMLInputElement;
 	private footerEl: HTMLElement;
+	private readonly initialSelectionId?: string;
 
 	constructor(app: App, options: JumpPanelOptions) {
 		super(app);
@@ -50,6 +53,7 @@ export class JumpPanel extends Modal {
 		this.placeholder = options.placeholder;
 		this.items = options.items;
 		this.filtered = options.items;
+		this.initialSelectionId = options.initialSelectionId;
 	}
 
 	onOpen(): void {
@@ -72,6 +76,7 @@ export class JumpPanel extends Modal {
 		this.inputEl.addEventListener("keydown", (event) => this.onKeyDown(event));
 
 		this.render();
+		this.selectInitial();
 		this.inputEl.focus();
 	}
 
@@ -167,11 +172,23 @@ export class JumpPanel extends Modal {
 		}
 	}
 
-	private scrollSelectionIntoView(): void {
-		const rows = this.listEl.querySelectorAll(".retrace-item.is-selected");
-		const row = rows[0];
+	private selectInitial(): void {
+		if (!this.initialSelectionId) {
+			return;
+		}
+		const index = this.filtered.findIndex((item) => item.id === this.initialSelectionId);
+		if (index < 0) {
+			return;
+		}
+		this.selected = index;
+		this.renderList();
+		this.scrollSelectionIntoView("center");
+	}
+
+	private scrollSelectionIntoView(block: ScrollLogicalPosition = "nearest"): void {
+		const row = this.listEl.querySelector(".retrace-item.is-selected");
 		if (row instanceof HTMLElement) {
-			row.scrollIntoView({ block: "nearest" });
+			row.scrollIntoView({ block });
 		}
 	}
 }

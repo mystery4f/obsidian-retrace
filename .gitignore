@@ -1,0 +1,16 @@
+node_modules/
+main.js
+*.js.map
+.tmp/
+.codegraph/
+data.json
+.DS_Store
+Thumbs.db
+*.log
+
+# The global excludesFile (~/.gitignore_global) ignores AGENTS.md, GLOSSARY.md and
+# docs/, which are tracked artifacts of this repo. Re-include them explicitly.
+!AGENTS.md
+!GLOSSARY.md
+!docs/
+!docs/**

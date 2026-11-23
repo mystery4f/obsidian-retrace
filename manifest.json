@@ -1,0 +1,10 @@
+{
+	"id": "retrace",
+	"name": "Retrace",
+	"version": "0.1.0",
+	"minAppVersion": "1.5.0",
+	"description": "IDEA-style recent files, recent locations and outline jump.",
+	"author": "mystery4f",
+	"authorUrl": "https://github.com/mystery4f",
+	"isDesktopOnly": false
+}

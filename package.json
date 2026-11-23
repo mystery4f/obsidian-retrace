@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-retrace",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "IDEA-style recent files, recent locations and outline jump for Obsidian",
 	"main": "main.js",
 	"scripts": {

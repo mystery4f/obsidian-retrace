@@ -22,10 +22,16 @@ export interface JumpItem {
 	onChoose(newLeaf: boolean): void;
 }
 
-export interface JumpPanelOptions {
+export interface JumpView {
+	/** Shown in the title bar, followed by the entry count. */
 	title: string;
 	placeholder: string;
 	items: JumpItem[];
+}
+
+export interface JumpPanelOptions {
+	/** The first view is the one shown on open; `Alt+F` cycles through the rest. */
+	views: JumpView[];
 	/** Item to preselect once the panel opens, e.g. the heading under the cursor. */
 	initialSelectionId?: string;
 }
@@ -38,10 +44,11 @@ const INDENT_STEP = 14;
  * keyboard contract of IDEA's popups.
  */
 export class JumpPanel extends Modal {
-	private readonly panelTitle: string;
-	private readonly placeholder: string;
-	private readonly items: JumpItem[];
+	private readonly views: JumpView[];
+	private activeView = 0;
+	private items: JumpItem[];
 	private filtered: JumpItem[];
+	private readonly initialSelectionId?: string;
 	private selected = 0;
 	private listEl: HTMLElement;
 	private rows: HTMLElement[] = [];
@@ -49,26 +56,23 @@ export class JumpPanel extends Modal {
 	private pointerY = -1;
 	private inputEl: HTMLInputElement;
 	private footerEl: HTMLElement;
-	private readonly initialSelectionId?: string;
-
 	constructor(app: App, options: JumpPanelOptions) {
 		super(app);
-		this.panelTitle = options.title;
-		this.placeholder = options.placeholder;
-		this.items = options.items;
-		this.filtered = options.items;
+		this.views = options.views;
+		this.items = this.views[0]?.items ?? [];
+		this.filtered = this.items;
 		this.initialSelectionId = options.initialSelectionId;
 	}
 
 	onOpen(): void {
 		this.modalEl.addClass("retrace-modal");
-		this.titleEl.setText(`${this.panelTitle} (${this.items.length})`);
+		this.titleEl.setText(`${this.currentView().title} (${this.items.length})`);
 		const { contentEl } = this;
 
 		this.inputEl = contentEl.createEl("input", {
 			type: "text",
 			cls: "retrace-input",
-			attr: { placeholder: this.placeholder },
+			attr: { placeholder: this.currentView().placeholder },
 		});
 		this.listEl = contentEl.createDiv("retrace-list");
 		this.footerEl = contentEl.createDiv("retrace-footer");
@@ -88,6 +92,25 @@ export class JumpPanel extends Modal {
 		this.contentEl.empty();
 	}
 
+
+	/** `Alt+F` moves to the next view, the way IDEA switches the popup's pages. */
+	private cycleView(): void {
+		if (this.views.length < 2) {
+			return;
+		}
+		this.activeView = (this.activeView + 1) % this.views.length;
+		const view = this.currentView();
+		this.items = view.items;
+		this.filtered = view.items;
+		this.selected = 0;
+		this.titleEl.setText(`${view.title} (${this.items.length})`);
+		this.inputEl.setAttribute("placeholder", view.placeholder);
+		this.render();
+	}
+
+	private currentView(): JumpView {
+		return this.views[this.activeView] ?? { title: "", placeholder: "", items: [] };
+	}
 	private onKeyDown(event: KeyboardEvent): void {
 		if (event.key === "ArrowDown") {
 			event.preventDefault();
@@ -98,6 +121,9 @@ export class JumpPanel extends Modal {
 		} else if (event.key === "Enter") {
 			event.preventDefault();
 			this.choose(event.ctrlKey || event.metaKey);
+		} else if (event.altKey && event.key.toLowerCase() === "f") {
+			event.preventDefault();
+			this.cycleView();
 		} else if (event.key === "Escape") {
 			event.preventDefault();
 			this.close();
@@ -129,7 +155,15 @@ export class JumpPanel extends Modal {
 			this.selected = Math.max(0, this.filtered.length - 1);
 		}
 		this.renderList();
-		this.footerEl.setText(`${this.filtered.length} / ${this.items.length}`);
+		this.footerEl.empty();
+		this.footerEl.createSpan({
+			cls: "retrace-count",
+			text: `${this.filtered.length} / ${this.items.length}`,
+		});
+		if (this.views.length > 1) {
+			const next = this.views[(this.activeView + 1) % this.views.length];
+			this.footerEl.createSpan({ cls: "retrace-hint", text: `Alt+F → ${next.title}` });
+		}
 	}
 
 	private renderList(): void {

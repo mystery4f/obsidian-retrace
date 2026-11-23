@@ -27,6 +27,7 @@ Retrace — an Obsidian plugin that brings IntelliJ IDEA's jump shortcuts to the
 - `src/headings.ts` — pure heading chain and current-heading helpers
 - `src/fuzzy.ts` — the subsequence filter behind the panel's typing
 - `test/` — `node:test` suites for those pure modules
+- `src/tabs.ts` — which open files the history has not recorded yet
 - `src/panel.ts` — the single jump panel modal shared by all three commands
 - `src/items.ts` — turns stored data into panel items, and opens files at a line
 - `src/settings.ts` — settings tab

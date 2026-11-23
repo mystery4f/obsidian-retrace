@@ -2,6 +2,7 @@ import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
 import {
 	buildFileItems,
 	buildLocationItems,
+	buildOpenFileItems,
 	buildOutlineItems,
 	headingLineAt,
 	lineAtTopOfPreview,
@@ -108,7 +109,12 @@ export default class RetracePlugin extends Plugin {
 			new Notice("Retrace: no recent files yet.");
 			return;
 		}
-		new JumpPanel(this.app, { title: "Recent files", placeholder: "Filter recent files…", items }).open();
+		new JumpPanel(this.app, {
+			views: [
+				{ title: "Recent files", placeholder: "Filter recent files…", items },
+				{ title: "Open editors", placeholder: "Filter open editors…", items: buildOpenFileItems(this.app) },
+			],
+		}).open();
 	}
 
 	private async openRecentLocations(): Promise<void> {
@@ -117,7 +123,9 @@ export default class RetracePlugin extends Plugin {
 			new Notice("Retrace: no recent locations yet.");
 			return;
 		}
-		new JumpPanel(this.app, { title: "Recent locations", placeholder: "Filter recent locations…", items }).open();
+		new JumpPanel(this.app, {
+			views: [{ title: "Recent locations", placeholder: "Filter recent locations…", items }],
+		}).open();
 	}
 
 	private openOutline(): void {
@@ -132,9 +140,7 @@ export default class RetracePlugin extends Plugin {
 			view?.file && cursorLine !== null ? headingLineAt(this.app, view.file, cursorLine) : null;
 		const initialSelectionId = headingLine === null ? undefined : `heading:${headingLine}`;
 		new JumpPanel(this.app, {
-			title: "Outline",
-			placeholder: "Filter headings…",
-			items,
+			views: [{ title: "Outline", placeholder: "Filter headings…", items }],
 			initialSelectionId,
 		}).open();
 	}

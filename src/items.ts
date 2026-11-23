@@ -1,28 +1,63 @@
 import { App, MarkdownView, TFile, moment } from "obsidian";
 import type { JumpItem, PreviewLine } from "./panel";
 import type { RetraceData } from "./model";
+import { unknownOpenPaths } from "./tabs";
 
 import { headingChainAt, lastHeadingLine, normalizeHeadingText } from "./headings";
+/** Markdown files that have a tab open, in workspace order, one entry per file. */
+export function openTabFiles(app: App): TFile[] {
+	const files: TFile[] = [];
+	const seen = new Set<string>();
+	app.workspace.iterateAllLeaves((leaf) => {
+		const file = leaf.view instanceof MarkdownView ? leaf.view.file : null;
+		if (file === null || seen.has(file.path)) {
+			return;
+		}
+		seen.add(file.path);
+		files.push(file);
+	});
+	return files;
+}
+
 export function buildFileItems(app: App, data: RetraceData): JumpItem[] {
-	const items: JumpItem[] = [];
+	const openOnly = unknownOpenPaths(
+		data.recentFiles,
+		openTabFiles(app).map((file) => file.path)
+	);
+	const items = openOnly
+		.map((path) => app.vault.getAbstractFileByPath(path))
+		.filter((file): file is TFile => file instanceof TFile)
+		.map((file) => fileItem(app, file, ""));
 	for (const entry of data.recentFiles) {
 		const file = app.vault.getAbstractFileByPath(entry.path);
 		if (!(file instanceof TFile)) {
 			continue;
 		}
-		items.push({
-			id: entry.path,
-			icon: "file-text",
-			title: file.basename,
-			subtitle: file.parent?.path ?? "/",
-			meta: moment(entry.openedAt).fromNow(),
-			searchText: entry.path,
-			onChoose: (newLeaf) => {
-				void openFileAt(app, file, undefined, newLeaf);
-			},
-		});
+		items.push(fileItem(app, file, moment(entry.openedAt).fromNow()));
 	}
 	return items;
+}
+
+/** The tab view of the recent-files panel: the files that have a tab open. */
+export function buildOpenFileItems(app: App): JumpItem[] {
+	return openTabFiles(app).map((file) => fileItem(app, file, ""));
+}
+
+function fileItem(app: App, file: TFile, meta: string): JumpItem {
+	const item: JumpItem = {
+		id: file.path,
+		icon: "file-text",
+		title: file.basename,
+		subtitle: file.parent?.path ?? "/",
+		searchText: file.path,
+		onChoose: (newLeaf) => {
+			void openFileAt(app, file, undefined, newLeaf);
+		},
+	};
+	if (meta !== "") {
+		item.meta = meta;
+	}
+	return item;
 }
 
 export async function buildLocationItems(

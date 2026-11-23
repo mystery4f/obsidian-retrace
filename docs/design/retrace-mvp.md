@@ -6,20 +6,21 @@ Scope of the first release: three commands, one jump panel, one data model.
 
 | Command id | Label | Default key | Opens |
 | --- | --- | --- | --- |
-| `recent-files` | `Retrace: Recent files` | `Ctrl+E` | MRU table of opened markdown files |
+| `recent-files` | `Retrace: Recent files` | `Ctrl+E` | MRU table of opened markdown files, plus the open editors under `Alt+F` |
 | `recent-locations` | `Retrace: Recent locations` | `Ctrl+Shift+E` | MRU table of caret positions |
 | `outline-jump` | `Retrace: Outline jump` | `Ctrl+F12` | headings of the active file |
 
 ## Jump panel
 
-One modal class renders all three panels; only the item source and the row renderer differ.
+One modal class renders all three panels; each panel passes one or more views, and only the item source and the row renderer differ.
 
 - Auto-focused text input at the top, filtering as you type.
 - Filter is a case-insensitive subsequence match on the item's search text. No dependency.
 - `ArrowUp` / `ArrowDown` move the selection and keep it scrolled into view.
 - `Enter` opens the selection in the active leaf; `Ctrl+Enter` opens in a new leaf.
+- `Alt+F` switches to the next view; the footer names it.
 - `Esc` closes.
-- Footer shows the match count.
+- Footer shows the match count and, when the panel has more than one view, the switch key.
 
 ## Data model (`data.json`)
 
@@ -77,6 +78,8 @@ Relative time uses `moment(...).fromNow()` from `obsidian`, so it follows the Ob
 - **Markdown only.** Non-markdown files are not recorded.
 - **No `Ctrl+E` restore toggle.** Rebinding lives in Obsidian's own hotkey settings; a plugin switch would duplicate that mechanism.
 - **Location preview is raw text.** Rendering markdown per line would break the line-number gutter and the fixed row height IDEA's popup has.
+- **Recent files includes the open editors.** A file with a tab open is a file the user was just at; the open ones the history has never seen are listed above the history without a timestamp, since inventing one would fake recency.
+- **Open editors is a view of the same panel, not a fourth command.** `Alt+F` switches views, so the popup keeps one hotkey and one mental model.
 
 ## Out of scope for the first release
 

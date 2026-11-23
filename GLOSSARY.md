@@ -27,3 +27,7 @@ _Avoid_: Symbol, TOC item, node
 **MRU table**:
 The move-to-front ordered list backing the recent files and recent locations panels.
 _Avoid_: History, cache, store
+
+**Open editor**:
+A file that has a tab open right now, whichever tab and pane it sits in.
+_Avoid_: Opened file, live file, active file

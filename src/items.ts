@@ -92,6 +92,67 @@ export function headingLineAt(app: App, file: TFile, line: number): number | nul
 	return found;
 }
 
+const HEADING_NUMBER_PREFIX = /^[\s\d.、，（）()]+/;
+
+function normalizeHeadingText(text: string): string {
+	return text.replace(HEADING_NUMBER_PREFIX, "").trim();
+}
+
+/**
+ * Reading mode has no caret, so the section at the top of the pane decides
+ * which heading is current. Preview headings map back to cache headings by
+ * level and text in document order: duplicate names stay apart, and headings
+ * of embedded notes are skipped because they belong to another file.
+ */
+export function lineAtTopOfPreview(app: App, view: MarkdownView): number | null {
+	const file = view.file;
+	if (!file) {
+		return null;
+	}
+	const headings = app.metadataCache.getFileCache(file)?.headings ?? [];
+	const scroller = view.previewMode.containerEl;
+	const elements = Array.from(
+		scroller.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6")
+	).filter((element) => element.closest(".markdown-embed") === null);
+	if (headings.length === 0 || elements.length === 0) {
+		return null;
+	}
+
+	const lines: (number | null)[] = [];
+	let searchFrom = 0;
+	for (const element of elements) {
+		const level = Number(element.tagName.slice(1));
+		const text = normalizeHeadingText(
+			element.getAttribute("data-heading") ?? element.textContent ?? ""
+		);
+		let line: number | null = null;
+		for (let index = searchFrom; index < headings.length; index++) {
+			const heading = headings[index];
+			if (heading.level === level && normalizeHeadingText(heading.heading) === text) {
+				line = heading.position.start.line;
+				searchFrom = index + 1;
+				break;
+			}
+		}
+		lines.push(line);
+	}
+
+	const fold = scroller.getBoundingClientRect().top + 8;
+	let current: number | null = null;
+	for (let index = 0; index < elements.length; index++) {
+		if (elements[index].getBoundingClientRect().top > fold) {
+			break;
+		}
+		if (lines[index] !== null) {
+			current = lines[index];
+		}
+	}
+	if (current !== null) {
+		return current;
+	}
+	return lines.find((line) => line !== null) ?? null;
+}
+
 async function openFileAt(
 	app: App,
 	file: TFile,

@@ -66,7 +66,7 @@ interface RetraceSettings {
 - Recent location: file name, heading path, right-aligned relative time, then a preview of `previewLines * 2 + 1` lines with a line-number gutter and the target line emphasised.
 - Outline entry: indented by heading level, heading text, the chain of ancestor headings as subtitle, right-aligned line number.
 - The selected row is a full-bleed bar painted with `var(--interactive-accent)` on `var(--text-on-accent)`, so it follows the active theme instead of fighting a warm palette. Both are read through `--retrace-selection` / `--retrace-selection-text`, which a snippet can override.
-- The outline panel preselects and centres the heading that contains the cursor.
+- The outline panel preselects and centres the heading that contains the cursor. Reading mode has no caret there, so the section at the top of the pane wins: preview headings map back to cached headings by level and text in document order.
 
 Relative time uses `moment(...).fromNow()` from `obsidian`, so it follows the Obsidian locale.
 

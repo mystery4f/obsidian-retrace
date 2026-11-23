@@ -4,6 +4,7 @@ import {
 	buildLocationItems,
 	buildOutlineItems,
 	headingLineAt,
+	lineAtTopOfPreview,
 } from "./src/items";
 import { JumpPanel } from "./src/panel";
 import { RetraceSettingTab } from "./src/settings";
@@ -125,7 +126,7 @@ export default class RetracePlugin extends Plugin {
 			return;
 		}
 		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-		const cursorLine = view ? view.editor.getCursor().line : null;
+		const cursorLine = this.lineOf(view);
 		const headingLine =
 			view?.file && cursorLine !== null ? headingLineAt(this.app, view.file, cursorLine) : null;
 		const initialSelectionId = headingLine === null ? undefined : `heading:${headingLine}`;
@@ -135,6 +136,17 @@ export default class RetracePlugin extends Plugin {
 			items,
 			initialSelectionId,
 		}).open();
+	}
+
+	/** Reading mode keeps no caret, so the same jump follows the top of the pane. */
+	private lineOf(view: MarkdownView | null): number | null {
+		if (!view) {
+			return null;
+		}
+		if (view.getMode() === "preview") {
+			return lineAtTopOfPreview(this.app, view);
+		}
+		return view.editor.getCursor().line;
 	}
 
 	private scheduleSave(): void {

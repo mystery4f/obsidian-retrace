@@ -43,6 +43,9 @@ export class JumpPanel extends Modal {
 	private filtered: JumpItem[];
 	private selected = 0;
 	private listEl: HTMLElement;
+	private rows: HTMLElement[] = [];
+	private pointerX = -1;
+	private pointerY = -1;
 	private inputEl: HTMLInputElement;
 	private footerEl: HTMLElement;
 	private readonly initialSelectionId?: string;
@@ -134,10 +137,12 @@ export class JumpPanel extends Modal {
 			this.listEl.createDiv({ cls: "retrace-empty", text: "No match" });
 			return;
 		}
+		this.rows = [];
 		this.filtered.forEach((item, index) => {
 			const row = this.listEl.createDiv({
 				cls: index === this.selected ? "retrace-item is-selected" : "retrace-item",
 			});
+			this.rows.push(row);
 			if (item.indent) {
 				row.style.paddingLeft = `${BASE_PADDING_LEFT + item.indent * INDENT_STEP}px`;
 			}
@@ -151,17 +156,27 @@ export class JumpPanel extends Modal {
 			if (item.meta) {
 				row.createSpan({ cls: "retrace-item-meta", text: item.meta });
 			}
-			row.addEventListener("click", () => {
-				this.selected = index;
-				this.choose(false);
-			});
+			const hover = (event: MouseEvent) => {
+				// A rebuild re-fires mouseenter under a resting pointer; only a real
+				// move should steal the selection back from the keyboard.
+				if (event.clientX === this.pointerX && event.clientY === this.pointerY) {
+					return;
+				}
+				this.pointerX = event.clientX;
+				this.pointerY = event.clientY;
+				this.select(index);
+			};
+			row.addEventListener("mouseenter", hover);
+			row.addEventListener("click", () => this.chooseAt(index));
 			if (item.preview && item.preview.length > 0) {
-				this.renderPreview(item.preview);
+				const previewEl = this.renderPreview(item.preview);
+				previewEl.addEventListener("mouseenter", hover);
+				previewEl.addEventListener("click", () => this.chooseAt(index));
 			}
 		});
 	}
 
-	private renderPreview(preview: PreviewLine[]): void {
+	private renderPreview(preview: PreviewLine[]): HTMLElement {
 		const previewEl = this.listEl.createDiv({ cls: "retrace-preview" });
 		for (const line of preview) {
 			const lineEl = previewEl.createDiv({
@@ -170,6 +185,28 @@ export class JumpPanel extends Modal {
 			lineEl.createSpan({ cls: "retrace-preview-no", text: String(line.lineNo) });
 			lineEl.createSpan({ cls: "retrace-preview-text", text: line.text });
 		}
+		return previewEl;
+	}
+
+	/** Hovering moves the selection, like IDEA: what you see is what Enter opens. */
+	private select(index: number): void {
+		if (index === this.selected) {
+			return;
+		}
+		const previous = this.rows[this.selected];
+		if (previous) {
+			previous.removeClass("is-selected");
+		}
+		this.selected = index;
+		const next = this.rows[index];
+		if (next) {
+			next.addClass("is-selected");
+		}
+	}
+
+	private chooseAt(index: number): void {
+		this.select(index);
+		this.choose(false);
 	}
 
 	private selectInitial(): void {

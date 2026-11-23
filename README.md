@@ -18,7 +18,15 @@ Every panel is the same centred modal: type to filter, arrow keys to move, `Ente
 
 ## Install
 
-Until the plugin is listed in the community directory, copy `manifest.json`, `main.js` and `styles.css` into `<vault>/.obsidian/plugins/retrace/` and enable it in Settings → Community plugins.
+### BRAT (beta)
+
+Install [BRAT](https://github.com/TfTHacker/obsidian42-brat), run **BRAT: Add a beta plugin for testing**, and enter `mystery4f/obsidian-retrace`. BRAT reads `manifest.json` from the repo root and pulls `main.js` and `styles.css` from the latest GitHub release; press **Check for updates** there to move to a newer release.
+
+Each release must keep `manifest.json` `version`, the git tag and `versions.json` in step — `npm run version` does that bump.
+
+### Manual
+
+Copy `manifest.json`, `main.js` and `styles.css` into `<vault>/.obsidian/plugins/retrace/` and enable it in Settings → Community plugins.
 
 ## Develop
 

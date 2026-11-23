@@ -43,6 +43,10 @@
 	cursor: pointer;
 }
 
+.retrace-item:hover:not(.is-selected) {
+	background: var(--background-modifier-hover);
+}
+
 .retrace-item.is-selected {
 	background: var(--retrace-selection);
 	color: var(--retrace-selection-text);

@@ -1,4 +1,5 @@
 import { App, Modal, setIcon } from "obsidian";
+import { matchesSubsequence } from "./fuzzy";
 
 export interface PreviewLine {
 	/** 1-based line number as shown in the gutter. */
@@ -230,20 +231,3 @@ export class JumpPanel extends Modal {
 	}
 }
 
-/** Case-insensitive subsequence match: "ilj" hits "Install > Jump". */
-export function matchesSubsequence(text: string, query: string): boolean {
-	if (query.length === 0) {
-		return true;
-	}
-	const haystack = text.toLowerCase();
-	const needle = query.toLowerCase();
-	let cursor = 0;
-	for (const char of needle) {
-		const hit = haystack.indexOf(char, cursor);
-		if (hit === -1) {
-			return false;
-		}
-		cursor = hit + 1;
-	}
-	return true;
-}

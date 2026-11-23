@@ -8,7 +8,8 @@ import {
 } from "./src/items";
 import { JumpPanel } from "./src/panel";
 import { RetraceSettingTab } from "./src/settings";
-import { MruStore, RetraceData, defaultData } from "./src/store";
+import { RetraceData, defaultData } from "./src/model";
+import { MruStore } from "./src/store";
 
 const SAVE_DELAY_MS = 2000;
 

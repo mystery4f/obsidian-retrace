@@ -1,7 +1,8 @@
 import { App, MarkdownView, TFile, moment } from "obsidian";
 import type { JumpItem, PreviewLine } from "./panel";
-import type { RetraceData } from "./store";
+import type { RetraceData } from "./model";
 
+import { headingChainAt, lastHeadingLine, normalizeHeadingText } from "./headings";
 export function buildFileItems(app: App, data: RetraceData): JumpItem[] {
 	const items: JumpItem[] = [];
 	for (const entry of data.recentFiles) {
@@ -56,14 +57,10 @@ export function buildOutlineItems(app: App): JumpItem[] {
 		return [];
 	}
 	const headings = app.metadataCache.getFileCache(file)?.headings ?? [];
-	const chain: string[] = [];
 	return headings.map((heading) => {
-		chain.length = heading.level - 1;
-		chain[heading.level - 1] = heading.heading;
-		const parents = chain
-			.slice(0, Math.max(0, heading.level - 1))
-			.filter((entry) => Boolean(entry));
 		const line = heading.position.start.line;
+		const chain = headingChainAt(headings, line);
+		const parents = chain.slice(0, -1);
 		return {
 			id: `heading:${line}`,
 			icon: "hash",
@@ -82,21 +79,9 @@ export function buildOutlineItems(app: App): JumpItem[] {
 /** Line of the last heading at or above `line`, for preselecting the outline. */
 export function headingLineAt(app: App, file: TFile, line: number): number | null {
 	const headings = app.metadataCache.getFileCache(file)?.headings ?? [];
-	let found: number | null = null;
-	for (const heading of headings) {
-		if (heading.position.start.line > line) {
-			break;
-		}
-		found = heading.position.start.line;
-	}
-	return found;
+	return lastHeadingLine(headings, line);
 }
 
-const HEADING_NUMBER_PREFIX = /^[\s\d.、，（）()]+/;
-
-function normalizeHeadingText(text: string): string {
-	return text.replace(HEADING_NUMBER_PREFIX, "").trim();
-}
 
 /**
  * Reading mode has no caret, so the section at the top of the pane decides
